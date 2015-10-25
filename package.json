@@ -1,0 +1,31 @@
+{
+  "name": "domohub",
+  "description": "Multi-sources monitoring and reporting system",
+  "version": "0.1.0",
+  "main": "domohub.js",
+  "author" :{
+     "name": "Gilles Polart-Donat",
+	 "email":"gp@lutra.io",
+	 "url":"http://www.lutra.io"
+  },
+  "licence": "GPL V3",
+  "dependencies": {
+    "express": ">=4.1.1",
+    "ejs": ">=1.0.0",
+    "body-parser": ">=1.2.0",
+    "serve-static": ">=1.2.3",
+    "pg": ">=3.3.0",
+    "winston": ">=1.0.1",
+    "debug": ">=0.6.2",
+    "yamljs": ">=0.2.3",
+    "md5": ">=2.0.0",
+    "async": ">=1.4.0"
+  },
+  "devDependencies": {
+    "expect.js": ">=0.3.1",
+    "mocha": ">=1.18.2",
+    "superagent": ">=0.18.0"
+  }
+}
+
+
