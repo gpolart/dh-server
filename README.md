@@ -1,4 +1,4 @@
-# DomoHub
+# dh-server
 
 Node.js multi-sources monitoring and reporting system.
 
