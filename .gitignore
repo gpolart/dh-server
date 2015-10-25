@@ -3,4 +3,4 @@ node_modules
 config.js
 *.log
 files
-public/log
+public/log/server.log

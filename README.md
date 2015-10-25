@@ -21,7 +21,11 @@ One or many of the defined storage plugins. The simple is File system.
 
 ### File system
 
-By default we use "./Files" directory (see config-sample.js)
+By default we use "./files" directory (see config-sample.js) so :
+
+```sh
+mkdir -p files/variables
+```
 
 ### PostgreSQL (TODO)
 
@@ -39,7 +43,7 @@ $ node server.js
 DomoHub use debug node module, so you can debug modules with :
 
 ```sh
-$ DEBUG=main,httpserver node server.js
+$ DEBUG=main,httpserver nodejs server.js
 ```
 
 ## Create variable
