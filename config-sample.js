@@ -27,7 +27,7 @@ config.xpl = {
                 ip_address     : "192.168.1.10",
                 ip_broadcast   : "192.168.1.255",
                 source_name    : "domohub-xpl-driver",
-                hbeat_interval : 5,
+                hbeat_interval : 5,    // in minutes
                 sources : [
                         {
                             name : "rfxcom-lan.xxxxxxxxxxxx"

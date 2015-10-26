@@ -4,7 +4,7 @@ Node.js multi-sources monitoring and reporting system.
 
 ## Installation
 
-It is a work in progress ...
+It is a quirk and dirty work in progress ...
 
 git clone and then :
 ```sh
