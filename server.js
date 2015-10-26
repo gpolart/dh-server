@@ -51,7 +51,13 @@ Date.prototype.formatISO = function(fl_hour, fl_utc) {
 //-----------------------------------------------------------------------------------------
 function exitHandler(options, err) {
 	debug("exitHandler   options : ", options);
-	if (options.exit) process.exit();
+    // TODO flush variable cache
+    variables.flush(function(err) {
+        if (err) {
+            console.log( "exitHandler flush variables error : " + err);
+        }
+	    if (options.exit) process.exit();
+    });
 }
 //catches ctrl+c event
 process.on('SIGINT', exitHandler.bind(null, {exit:true}));
