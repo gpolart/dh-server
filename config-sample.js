@@ -22,7 +22,21 @@ config.variables = {
                  };
 
 
-
+config.xpl = {
+                port           : 3865,
+                ip_address     : "192.168.1.10",
+                ip_broadcast   : "192.168.1.255",
+                source_name    : "domohub-xpl-driver",
+                hbeat_interval : 5,
+                sources : [
+                        {
+                            name : "rfxcom-lan.xxxxxxxxxxxx"
+                        },
+                        {
+                            name : "eedomus-xpl.xxxxxxxxxxxx"
+                        }
+                ]
+             };
 
 //
 module.exports = config;
