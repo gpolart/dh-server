@@ -90,7 +90,7 @@ logger.start(config.logger, function(err) {
                     }
                     else {
                         logger.log("Variable OK");
-                        httpserver.start(config.http_port);
+                        httpserver.start(config.http_port, config.http_public_path);
                     }
                 });
             }
