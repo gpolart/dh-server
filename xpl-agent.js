@@ -19,7 +19,6 @@ var dgram = require('dgram');
 var request  = require('request');
 var yaml = require('yamljs');
 var fs = require('fs');
-var logger  = require('./lib/logger.js');
 var config  = require('./config.js');
 //
 // Sockets to listen on and to send orders
@@ -33,9 +32,6 @@ var message_count = 0;
 var config_path = config.storage.conf_dir;
 
 var xpl_config = {};
-
-//var variables = [];
-//var unknown = [];
 var sources_idx = {};
 
 //=========================================================================================
@@ -59,6 +55,7 @@ function emit_hbeat() {
 	sender.send(msg, 0, msg.length, 3865, hbeat_ip_broadcast, function () {
 		debug("message sent arguments = ", arguments);
 	});
+	log_message("emit hbeat");
 
     record_variable("xpl.messages", message_count);
     message_count = 0;
@@ -115,7 +112,7 @@ function process_message(xpl_msg) {
     //
     if (!sources_idx.hasOwnProperty(xpl_msg.source)) {
     //if (!xpl_config.sources.hasOwnProperty(xpl_msg.source)) {
-        logger.log(new Date(), "Source <"+xpl_msg.source+"> unknown for " + xpl_msg.str);
+        log_message("Source <"+xpl_msg.source+"> unknown for " + xpl_msg.str);
         sources_idx[xpl_msg.source] = { ident : xpl_msg.source,
                                                ignore : true };
         //storage.store_driver_config('xpl', xpl_config);
@@ -131,7 +128,6 @@ function process_message(xpl_msg) {
     var_name.push(xpl_msg.source);
     //var type; // TODO usable ?
     var value;
-    var send = false;
     var process = false;
 
     // sensor.basic
@@ -169,16 +165,16 @@ function process_message(xpl_msg) {
 	else if ( (xpl_msg.mess === 'log.basic') && (xpl_msg.type === 'xpl-trig') ) {
         if (xpl_msg.body['text'] === 'unknown sensor') {
             if (src.log_unknown) {
-                logger.log(new Date(), "Source <"+xpl_msg.source+"> unknown sensor : " + xpl_msg.str);
+                log_message("Source <"+xpl_msg.source+"> unknown sensor : " + xpl_msg.str);
             }
 		}
 		else {
-            logger.log(new Date(), "Source <"+xpl_msg.source+">  unknown message : " + xpl_msg.str);
+            log_message("Source <"+xpl_msg.source+">  unknown message : " + xpl_msg.str);
 		}
 	}
     // message not interpreted, just log it
     else {
-        logger.log(new Date(), "Source <"+xpl_msg.source+">  unknown message : " + xpl_msg.str);
+        log_message("Source <"+xpl_msg.source+">  unknown message : " + xpl_msg.str);
     }
 
     // Search if variable is configured 
@@ -187,9 +183,12 @@ function process_message(xpl_msg) {
     if (process) {
         var key = var_name.join(".");
         var ident = key.replace(/ /g, "_");
-        if (xpl_config.keys.hasOwnProperty(ident)) {
+        if (xpl_config.ignore.hasOwnProperty(ident)) {
 	        debug("found ident  " + ident + " for key " + key);
-            send = true;
+        }
+        else if (xpl_config.keys.hasOwnProperty(ident)) {
+	        debug("found ident  " + ident + " for key " + key);
+            record_variable("xpl." + ident, value);
         }
         else {
 	        debug("not found ident  " + ident + " for key " + key);
@@ -198,13 +197,6 @@ function process_message(xpl_msg) {
                 store_config();
                 record_variable("xpl.discovery", ident);
             }
-        }
-        //
-        // Send value if OK
-        //
-        if (send) {
-            //dispatch.send({ driver : "xpl", msg_type : "value", variable : xpl_config.keys[ident], value: value, time:xpl_msg.time });
-            record_variable("xpl." + ident, value);
         }
     }
 } // end of process_message
@@ -255,11 +247,15 @@ function read_config () {
         if (xpl_config['unknown'] === null) {
             xpl_config['unknown'] = {};
         }
+        if (xpl_config['ignore'] === null) {
+            xpl_config['ignore'] = {};
+        }
     }
     else {
         xpl_config = {};
         xpl_config['keys'] = {};
         xpl_config['unknown'] = {};
+        xpl_config['ignore'] = {};
     }
 }
 // ----------------------------------------------------------------------------------------
@@ -273,13 +269,21 @@ function store_config () {
     fs.writeFileSync(config_path + "xpl-agent.yml", str);
 
 }
+// ----------------------------------------------------------------------------------------
+// Log messages as a variable
+// ----------------------------------------------------------------------------------------
+function log_message(msg) {
+    debug("log_message ... ");
+
+    record_variable("xpl.logs", msg);
+}
 
 //=========================================================================================
 // Main server initialize
 //-----------------------------------------------------------------------------------------
 function start(options) {
 	debug("========  xpl-agent starting ==========");
-	logger.log(" xpl-agent starting ...");
+	log_message(" xpl-agent starting ...");
 
 	server.on('listening', function () {
 		var address = server.address();
