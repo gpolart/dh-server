@@ -2,5 +2,4 @@ node_modules
 *.swp
 config.js
 *.log
-files
 public/log/server.log
