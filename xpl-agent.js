@@ -203,7 +203,7 @@ function process_message(xpl_msg) {
 // ---------------------------------------------------------------------------
 // record variable
 // ---------------------------------------------------------------------------
-function record_variable(name, value) {
+function record_variable(ident, value) {
 	debug("record_variable ....");
     var headers = {
         'User-Agent' :    'xpl-agent',
@@ -214,18 +214,13 @@ function record_variable(name, value) {
         url : 'http://localhost:8888/api/add_value',
         method : 'POST',
         headers : headers,
-        form : {'name' : name, 'value' : value }
+        form : {'ident' : ident, 'value' : value, create : 'yes' }
     }
 
     request(options, function(err, resp, body) {
         debug("err = " + err);
         debug("body = " + body);
-        /*
-        if (!error && response.statusCode == 200) {
-        // Print out the response body
-        console.log(body)
-    }
-        */
+        // TODO test return of request
     });
 }
 // ----------------------------------------------------------------------------------------

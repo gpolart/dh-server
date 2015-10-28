@@ -27,7 +27,10 @@
             <table class="table">
                 <thead>
                         <tr>
+                            <th>Ident</th>
                             <th>Name</th>
+                            <th>Type</th>
+                            <th>Groups</th>
                             <th>Last seen </th>
                             <th>Last value</th>
                         </tr>
@@ -35,7 +38,10 @@
                 <tbody>
                     <% data.forEach(function(item) { %>
                         <tr>
-                            <td><a href="/variable/<%= item.name %>"><%= item.name %></a></td>
+                            <td><a href="/variable/<%= item.ident %>"><%= item.ident %></a></td>
+                            <td><%= item.meta.name %></td>
+                            <td><%= item.meta.type %></td>
+                            <td><%= item.meta.group_str %></td>
                             <td><%= item.meta.last_seen %></td>
                             <td><%= item.meta.last_value %></td>
                         </tr>
