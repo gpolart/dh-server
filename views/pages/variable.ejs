@@ -59,12 +59,15 @@
                                 <div class="col-sm-8">
                                         <p><% groups.join(', ', variable.meta.groups) %> <span><button>Add</button></span></p>
                                 </div>
+                            </div>
                             <button type="submit" class="btn btn-default">OK</button>
                         </form>
                     </div>
                 </div>
             </div>
-            <div class="panel col-md-8">
+            <div class="col-md-8">
+                <div id="values">
+                </div>
             </div>
         </div>
     </main>
@@ -106,6 +109,51 @@
             });
          });
 
+         function draw_values_as_table(values) {
+            $('#values').empty();
+            var $table = $('<table class="table"></table>').appendTo($('#values'));
+            $('<thead><tr><th>Date</th><th>Values</th></tr></thead>').appendTo($table);
+            var $tbody = $('<tbody></tbody>').appendTo($table);
+            var lines = values.split("\n");
+            $.each(lines, function(num, l) {
+                var items = l.split(":");
+                $('<tr><td>'+items[0]+'</td><td>'+items[1]+'</td></tr>').appendTo($table);
+            });
+         }
+
+         function draw_values_as_chart(values) {
+            draw_values_as_table(result.values);
+         };
+
+         function load_values(id, type) {
+            console.log("id = " + id);
+            $.ajax({
+               url: '/api/get_values',
+               type: 'GET',
+               data: {ident : id}
+            }).done(function( result ) {
+               if ($.isPlainObject(result)) {
+                    if (result.status === "OK") {
+                        if (type === 'Numeric') {
+                            draw_values_as_chart(result.values);
+                        }
+                        else {
+                            draw_values_as_table(result.values);
+                        }
+                    }
+                    else {
+                        alert('Erreur système');
+                    }
+                }
+                else {
+                    alert('Erreur système');
+                }
+            }).fail(function(err) {
+                alert('Erreur  err = ' + err);
+            });
+         }
+
+        load_values('<%= variable.ident %>', '<%= variable.type %>');
     });
     </script> 
 </body>
