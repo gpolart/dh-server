@@ -19,7 +19,7 @@ var httpserver  = require('./lib/httpserver/httpserver.js');
 var logger  = require('./lib/logger.js');
 var storage  = require('./lib/storage.js');
 var variables  = require('./lib/variables.js');
-//var async  = require('async');
+var async  = require('async');
 
 //
 // Complement prototypes for system libs
@@ -69,31 +69,55 @@ process.on('SIGINT', exitHandler.bind(null, {exit:true}));
 //
 var config  = require('./config.js');
 debug("config  : ", config);
-logger.start(config.logger, function(err) {
-    // TODO process that
-    if (err !== null) {
-        debug("cb start logger err  : ", err);
-    }
-    else {
-        debug("===> OK logger");
-        logger.log(" ========= Started ====================");
-        logger.log("Logger OK");
+
+var funcs = [
+    function(cb) {
+        logger.start(config.logger, function(err) {
+            var res = "logger OK";
+            if (err !== null) {
+                debug("cb start logger err  : ", err);
+                res = "logger KO";
+            }
+            cb(err, res);
+        });
+    },
+    function(cb) {
         storage.initialize(config.storage, function(err) {
+            var res = "storage OK";
             if (err !== null) {
                 debug("cb initialize storage err  : ", err);
+                res = "storage KO";
             }
-            else {
-                logger.log("Storage OK");
-                variables.initialize(config.variables, function(err) {
-                    if (err !== null) {
-                        debug("cb initialize variables err  : ", err);
-                    }
-                    else {
-                        logger.log("Variable OK");
-                        httpserver.start(config.http_port, config.http_public_path);
-                    }
-                });
-            }
+            cb(err, res);
         });
+    },
+    function(cb) {
+        variables.initialize(config.variables, function(err) {
+            var res = "variables OK";
+            if (err !== null) {
+                debug("cb initialize variables err  : ", err);
+                res = "variables KO";
+            }
+            cb(err, res);
+        });
+    }
+];
+// Add initialization function for modules
+//
+config.modules.forEach(function(item) {
+    funcs.push(function(cb) {
+        mod = require('./lib/modules/'+item.name+'.js');
+        mod.initialize(item.params, cb);
+    });
+});
+// Start all
+//
+async.series(funcs, function(err, results) {
+    debug("results = ", results);
+    if (err !== null) {
+	    process.exit();
+    }
+    else {
+        httpserver.start(config.http_port, config.http_public_path);
     }
 });

@@ -38,6 +38,12 @@ config.xpl = {
                 ]
              };
 
+config.modules = [
+                    { name: 'heating', params: {} },
+                    { name: 'dummy', params: {} }
+                 ];
+
+
 //
 module.exports = config;
 
