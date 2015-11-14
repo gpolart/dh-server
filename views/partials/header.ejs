@@ -13,11 +13,19 @@
             <li class="dropdown">
                 <a href="#" class=dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Modules <span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                    <li><a href="/module/heating">Heating</a></li>
+                    <% header.modules.forEach(function(item) { %>
+                        <li><a href="/module/<%= item.ident %>"><%= item.label %></a></li>
+                    <% }) %>
                 </ul>
             </li>
-            <li><a href="/screens">Screens</a></li>
+            <li class="dropdown">
+                <a href="#" class=dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Screens <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <% header.screens.forEach(function(item) { %>
+                        <li><a href="/screen/<%= item.ident %>"><%= item.label %></a></li>
+                    <% }) %>
+                </ul>
+            </li>
         </ul>
-      
     </div>
 </nav>

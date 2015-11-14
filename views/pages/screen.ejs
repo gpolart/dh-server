@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+</head>
+<body class="container-fluid">
+
+    <header>
+        <% include ../partials/header %>
+    </header>
+
+
+    <main>
+        <% var local = {};
+           local.id = 1;
+           local.funcs = [];
+        %>
+        <% screen.rows.forEach(function(row) { %>
+            <div class="row">
+                <% row.cols.forEach(function(col) { %>
+                    <div id="widget-<%= local.id %>" class="col-md-<%= col.slots %>">
+                        <% id = "widget-" + local.id %>
+                        <%- include('../widgets/' + col.widget) %>
+                        <%-
+                            local.funcs.push( { name: col.widget, target_id : id, data : "'" + JSON.stringify(col.params) + "'"} );
+                        %>
+                    </div>
+                <% local.id += 1 %>
+                <% }) %>
+            </div>
+        <% }) %>
+    </main>
+    <footer>
+        <% include ../partials/footer %>
+    </footer>
+    
+    <% include ../partials/javascript %>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        var funcs = [
+            <% local.funcs.forEach(function(f) { %>
+                { name : <%= f.name %>_action, target_id : "<%= f.target_id %>", data : JSON.parse(<%- f.data %>)},
+            <% }) %>
+            { name : last_action , target_id : null, params : null }
+        ];
+
+        function last_action() {
+            console.log("last_action ");
+        }
+        function simple_action(id, data) {
+            console.log("simple_action for " + id);
+            console.log("variable  " + data.variable);
+            $.ajax({
+               url: '/api/get_last_value',
+               type: 'GET',
+               data: {ident : data.variable}
+            }).done(function( result ) {
+               if ($.isPlainObject(result)) {
+                    if (result.status === "OK") {
+                        $('#'+id).html(result.value);
+                    }
+                    else {
+                        alert('Erreur système');
+                    }
+                }
+                else {
+                    alert('Erreur système');
+                }
+            }).fail(function(err) {
+                alert('Erreur  err = ' + err);
+            });
+
+        }
+
+        setInterval(function () {
+            console.log("interval func");
+            funcs.forEach(function(f) {
+                f.name(f.target_id, f.data);
+            });
+        }, 3000);
+    });
+    </script> 
+</body>
+</html>
