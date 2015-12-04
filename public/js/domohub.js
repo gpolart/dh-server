@@ -15,6 +15,31 @@
 // ======================================================================
 //
 
+//
+// Complement prototypes for system libs
+//
+Date.prototype.formatISO = function(fl_hour, fl_utc) {
+	function zeroPad(n) {
+		return (n < 10 ? '0' : '') + n;
+	}
+
+	var c;
+	if (fl_utc === true) {
+		c = this.getUTCFullYear() + '-' + zeroPad(this.getUTCMonth() + 1) + '-' + zeroPad(this.getUTCDate());
+		if (fl_hour) {
+			c += ' ' + zeroPad(this.getUTCHours()) + ':' + zeroPad(this.getUTCMinutes()) + ':' + zeroPad(this.getUTCSeconds());
+		}
+	}
+	else {
+		c = this.getFullYear() + '-' + zeroPad(this.getMonth() + 1) + '-' + zeroPad(this.getDate());
+		if (fl_hour) {
+			c += ' ' + zeroPad(this.getHours()) + ':' + zeroPad(this.getMinutes()) + ':' + zeroPad(this.getSeconds());
+		}
+	}
+
+	return c;
+}
+
 $(document).ready(function() {
 
 });

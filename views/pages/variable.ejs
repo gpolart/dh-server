@@ -117,7 +117,10 @@
             var lines = values.split("\n");
             $.each(lines, function(num, l) {
                 var items = l.split(":");
-                $('<tr><td>'+items[0]+'</td><td>'+items[1]+'</td></tr>').appendTo($table);
+                var date = new Date(1*items[0]);
+                console.log ("item[0]  "+items[0]+"  date " + date);
+                var sd = date.formatISO(true, false);
+                $('<tr><td>'+sd+'</td><td>'+items[1]+'</td></tr>').appendTo($table);
             });
          }
 
