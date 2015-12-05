@@ -56,6 +56,12 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <label class="col-sm-4 control-label" for="unit">Unit</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" id="unit" placeholder="Unit" value="<%= variable.meta.unit %>">
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label class="col-sm-4 control-label" for="name">Groups</label>
                                 <div class="col-sm-8">
                                         <p><% groups.join(', ', variable.meta.groups) %> <span><button>Add</button></span></p>
@@ -86,6 +92,7 @@
             ev.preventDefault();
             var ident = $('#ident').val();
             var name = $('#name').val();
+            var unit = $('#unit').val();
             var type = $('#var-type').val();
 
             $.ajax({
@@ -94,6 +101,7 @@
                dataType: 'json',
                data: { ident : ident,
                        name : name,
+                       unit : unit,
                        type : type
                      }
             }).done(function( result ) {
@@ -136,13 +144,18 @@
             //var data = [{ "key": "Key1", "values": [{x:0, y:1.00},{x:10,y:0.50}]}];
             var data = [{ "key": "Key1", "values": []}];
             var lines = values.split("\n");
+            var min = 0;
+            var max = 0;
             $.each(lines, function(num, l) {
                 if (l.length > 0) {
                     var items = l.split(":");
                     var date = new Date(1*items[0]);
                     //console.log ("item[0]  "+items[0]+"  date " + date);
                     var sd = date.formatISO(true, false);
-                    data[0].values.push({x:items[0], y:items[1]});
+                    var v = 1.0*items[1];
+                    data[0].values.push({x:items[0], y:v});
+                    if (min > v) { min = v; }
+                    if (max < v) { max = v; }
                 }
             });
             nv.addGraph(function() {
@@ -150,7 +163,7 @@
                                 .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
                                 .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
                                 //.transitionDuration(350)  //how fast do you want the lines to transition?
-                                .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
+                                //.showLegend(true)       //Show the legend, allowing users to turn on/off line series.
                                 .showYAxis(true)        //Show the y-axis
                                 .showXAxis(true)        //Show the x-axis
                             ;
@@ -167,7 +180,8 @@
                       .tickFormat(function (d) { return tickMultiFormat(new Date(d)); });
 
                   chart.yAxis     //Chart y-axis settings
-                      .axisLabel('KW/h')
+                      .axisLabel('')
+                      .showMaxMin(true)
                       .tickFormat(d3.format('.02f'));
 
 

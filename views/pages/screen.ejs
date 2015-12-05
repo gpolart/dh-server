@@ -10,18 +10,18 @@
     </header>
 
 
-    <main>
+    <main class="screen">
         <% var local = {};
            local.id = 1;
            local.funcs = [];
         %>
         <% screen.rows.forEach(function(row) { %>
-            <div class="row">
+            <div class="row screen">
                 <% row.cols.forEach(function(col) { %>
                     <div id="widget-<%= local.id %>" class="col-md-<%= col.slots %>">
                         <% id = "widget-" + local.id %>
                         <%- include('../widgets/' + col.widget) %>
-                        <%-
+                        <%
                             local.funcs.push( { name: col.widget, target_id : id, data : "'" + JSON.stringify(col.params) + "'"} );
                         %>
                     </div>
@@ -57,7 +57,9 @@
             }).done(function( result ) {
                if ($.isPlainObject(result)) {
                     if (result.status === "OK") {
-                        $('#'+id).html(result.value);
+                        $('#'+id + " .name").html(result.meta.name);
+                        $('#'+id + " .value").html(result.meta.last_value);
+                        $('#'+id + " .unit").html(result.meta.unit);
                     }
                     else {
                         alert('Erreur système');
@@ -72,12 +74,18 @@
 
         }
 
-        setInterval(function () {
-            console.log("interval func");
+        function call_funcs() {
             funcs.forEach(function(f) {
                 f.name(f.target_id, f.data);
             });
-        }, 3000);
+        }
+
+        setInterval(function () {
+            console.log("interval func");
+            call_funcs();
+        }, 5000);
+
+        call_funcs();
     });
     </script> 
 </body>

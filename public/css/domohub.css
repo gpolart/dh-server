@@ -1,0 +1,28 @@
+
+.screen {
+    background-color:#404040;
+}
+
+/* Widgets */
+
+.widget {
+    margin : 0.5em;
+    padding : 1em;
+    background-color:#101010;
+    color: white;
+    border-style:groove;
+}
+
+/* Simple */
+
+.name {
+    font-weight: bold;
+}
+
+.value {
+    font-weight: bold;
+    font-size:400%;
+}
+.unit {
+    font-size:150%;
+}
