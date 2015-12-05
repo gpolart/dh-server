@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <% include ../partials/head %>
+    <link rel="stylesheet" href="/css/nv.d3.css">
 </head>
 <body class="container-fluid">
 
@@ -76,6 +77,8 @@
     </footer>
     
     <% include ../partials/javascript %>
+    <script src="/jslib/d3.min.js"></script>
+    <script src="/jslib/nv.d3.min.js"></script>
     <script type="text/javascript">
     $(document).ready(function() {
 
@@ -116,16 +119,66 @@
             var $tbody = $('<tbody></tbody>').appendTo($table);
             var lines = values.split("\n");
             $.each(lines, function(num, l) {
-                var items = l.split(":");
-                var date = new Date(1*items[0]);
-                console.log ("item[0]  "+items[0]+"  date " + date);
-                var sd = date.formatISO(true, false);
-                $('<tr><td>'+sd+'</td><td>'+items[1]+'</td></tr>').appendTo($table);
+                if (l.length > 0) {
+                    var items = l.split(":");
+                    var date = new Date(1*items[0]);
+                    //console.log ("item[0]  "+items[0]+"  date " + date);
+                    var sd = date.formatISO(true, false);
+                    $('<tr><td>'+sd+'</td><td>'+items[1]+'</td></tr>').appendTo($table);
+                }
             });
          }
 
          function draw_values_as_chart(values) {
-            draw_values_as_table(result.values);
+            $('#values').empty();
+            //$('<svg id="chart"></svg>').height("400px").width('600px').appendTo($('#values'));
+            $('<svg id="chart"></svg>').height('600px').appendTo($('#values'));
+            //var data = [{ "key": "Key1", "values": [{x:0, y:1.00},{x:10,y:0.50}]}];
+            var data = [{ "key": "Key1", "values": []}];
+            var lines = values.split("\n");
+            $.each(lines, function(num, l) {
+                if (l.length > 0) {
+                    var items = l.split(":");
+                    var date = new Date(1*items[0]);
+                    //console.log ("item[0]  "+items[0]+"  date " + date);
+                    var sd = date.formatISO(true, false);
+                    data[0].values.push({x:items[0], y:items[1]});
+                }
+            });
+            nv.addGraph(function() {
+                var chart = nv.models.lineChart()
+                                .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
+                                .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
+                                //.transitionDuration(350)  //how fast do you want the lines to transition?
+                                .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
+                                .showYAxis(true)        //Show the y-axis
+                                .showXAxis(true)        //Show the x-axis
+                            ;
+
+                     var tickMultiFormat = d3.time.format.multi([
+            ["%-H:%M", function(d) { return d.getMinutes(); }], // not the beginning of the hour
+            ["%-H", function(d) { return d.getHours(); }], // not midnight
+            ["%b %-d", function(d) { return d.getDate() != 1; }], // not the first of the month
+            ["%b %-d", function(d) { return d.getMonth(); }], // not Jan 1st
+            ["%Y", function() { return true; }]
+        ]);
+                  chart.xAxis     //Chart x-axis settings
+                      .axisLabel('Time')
+                      .tickFormat(function (d) { return tickMultiFormat(new Date(d)); });
+
+                  chart.yAxis     //Chart y-axis settings
+                      .axisLabel('KW/h')
+                      .tickFormat(d3.format('.02f'));
+
+
+                  d3.select('#chart')    //Select the <svg> element you want to render the chart in.   
+                      .datum(data)         //Populate the <svg> element with chart data...
+                      .call(chart);          //Finally, render the chart!
+
+                  //Update the chart when window resizes.
+                  nv.utils.windowResize(function() { chart.update() });
+                  return chart;
+            });
          };
 
          function load_values(id, type) {
@@ -137,6 +190,7 @@
             }).done(function( result ) {
                if ($.isPlainObject(result)) {
                     if (result.status === "OK") {
+                        console.log("type = " + type);
                         if (type === 'Numeric') {
                             draw_values_as_chart(result.values);
                         }
@@ -156,7 +210,7 @@
             });
          }
 
-        load_values('<%= variable.ident %>', '<%= variable.type %>');
+        load_values('<%= variable.ident %>', '<%= variable.meta.type %>');
     });
     </script> 
 </body>
