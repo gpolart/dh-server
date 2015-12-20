@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <% include ../partials/head %>
+    <link rel="stylesheet" href="/css/nv.d3.css">
 </head>
 <body class="container-fluid">
 
@@ -13,6 +14,7 @@
     <main class="screen">
         <% var local = {};
            local.id = 1;
+           local.init = [];
            local.funcs = [];
         %>
         <% screen.rows.forEach(function(row) { %>
@@ -23,6 +25,9 @@
                         <%- include('../widgets/' + col.widget) %>
                         <%
                             local.funcs.push( { name: col.widget, target_id : id, data : "'" + JSON.stringify(col.params) + "'"} );
+                            if (col.init) {
+                                local.init.push( { name: col.widget, target_id : id, data : "'" + JSON.stringify(col.params) + "'"} );
+                            }
                         %>
                     </div>
                 <% local.id += 1 %>
@@ -35,8 +40,19 @@
     </footer>
     
     <% include ../partials/javascript %>
+    <script src="/jslib/d3.min.js"></script>
+    <script type="text/javascript" src="/jslib/gauge.js"></script>
     <script type="text/javascript">
     $(document).ready(function() {
+        var screen = {};
+        var inits = [
+            <% local.init.forEach(function(f) { %>
+                { name : <%= f.name %>_init, target_id : "<%= f.target_id %>", data : JSON.parse(<%- f.data %>)},
+            <% }) %>
+            { name : last_action , target_id : null, params : null }
+        ];
+        console.log("inits ");
+        console.dir(inits);
         var funcs = [
             <% local.funcs.forEach(function(f) { %>
                 { name : <%= f.name %>_action, target_id : "<%= f.target_id %>", data : JSON.parse(<%- f.data %>)},
@@ -46,6 +62,49 @@
 
         function last_action() {
             console.log("last_action ");
+        }
+        function gauge_init(id, data) {
+            console.log("gauge_init for " + id);
+            if (!screen.hasOwnProperty('gauges')) {
+                screen['gauges'] = {};
+            }
+            var min = 0;
+            var max = 100;
+            var config = 
+				{
+					size: 120,
+					label: 'Gauge',
+					min: undefined != min ? min : 0,
+					max: undefined != max ? max : 100,
+					minorTicks: 5
+				}
+            screen.gauges[id] = new Gauge(id, config);
+            screen.gauges[id].render();
+        }
+
+        function gauge_action(id, data) {
+            console.log("gauge_action for " + id);
+            console.log("variable  " + data.variable);
+            $.ajax({
+               url: '/api/get_last_value',
+               type: 'GET',
+               data: {ident : data.variable}
+            }).done(function( result ) {
+               if ($.isPlainObject(result)) {
+                    if (result.status === "OK") {
+                        screen.gauges[id].redraw(result.meta.last_value);
+                    }
+                    else {
+                        alert('Erreur système');
+                    }
+                }
+                else {
+                    alert('Erreur système');
+                }
+            }).fail(function(err) {
+                alert('Erreur  err = ' + err);
+            });
+
         }
         function simple_action(id, data) {
             console.log("simple_action for " + id);
@@ -73,6 +132,10 @@
             });
 
         }
+
+        inits.forEach(function(f) {
+            f.name(f.target_id, f.data);
+        });
 
         function call_funcs() {
             funcs.forEach(function(f) {
