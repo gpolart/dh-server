@@ -179,6 +179,7 @@ function process_message(xpl_msg) {
 
     // Search if variable is configured 
     //
+    var now = new Date();
 	debug("var_name ", var_name);
     if (process) {
         var key = var_name.join(".");
@@ -188,7 +189,29 @@ function process_message(xpl_msg) {
         }
         else if (xpl_config.keys.hasOwnProperty(ident)) {
 	        debug("found ident  " + ident + " for key " + key);
-            record_variable("xpl." + ident, value);
+            if (xpl_config.keys[ident].hasOwnProperty('average')) {
+	            debug('calculate average meta = ', xpl_config.keys[ident]);
+                xpl_config.keys[ident].buffer.push(value);
+                var diff = (now.getTime() - xpl_config.keys[ident].last_sent.getTime()) / 1000 ;
+	            debug('diff = ', diff);
+                // TODO take a time ponderation to integrate value
+                if (diff > xpl_config.keys[ident].average) {
+                    var sum = 0;
+                    var count = 0;
+                    xpl_config.keys[ident].buffer.forEach(function(item, num) {
+                        sum = sum + 1.0*item;
+                        count = count + 1;
+                    });
+	                debug('sum = ', sum);
+	                debug('count = ', count);
+                    record_variable("xpl." + ident, sum/count);
+                    xpl_config.keys[ident].buffer = [];
+                    xpl_config.keys[ident].last_sent = now;
+                }
+            }
+            else {
+                record_variable("xpl." + ident, value);
+            }
         }
         else {
 	        debug("not found ident  " + ident + " for key " + key);
@@ -204,7 +227,8 @@ function process_message(xpl_msg) {
 // record variable
 // ---------------------------------------------------------------------------
 function record_variable(ident, value) {
-	debug("record_variable ....");
+	debug("record_variable .... ident = ", ident);
+
     var headers = {
         'User-Agent' :    'xpl-agent',
         'Content-Type' : 'application/x-www-form-urlencoded'
@@ -321,7 +345,19 @@ function start(options) {
     // Get configuration from file system
     //
     read_config();
-	debug('xpl_config = ', xpl_config);
+	//debug('xpl_config = ', xpl_config);
+    //
+    // Init filters
+    //
+    var now = new Date();
+    for (key in xpl_config.keys) {
+        if (xpl_config.keys.hasOwnProperty(key)) {
+	        debug('key = ', key);
+	        debug('meta = ', xpl_config.keys[key]);
+            xpl_config.keys[key].last_sent = now;
+            xpl_config.keys[key].buffer = [];
+        }
+    }
 
     //
     // Prepare sources informations and index
