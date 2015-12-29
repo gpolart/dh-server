@@ -22,7 +22,16 @@
                 <a href="#" class=dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Screens <span class="caret"></span></a>
                 <ul class="dropdown-menu">
                     <% header.screens.forEach(function(item) { %>
-                        <li><a href="/screen/<%= item.ident %>"><%= item.label %></a></li>
+                        <li><a href="/screens/<%= item.ident %>"><%= item.label %></a></li>
+                    <% }) %>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#" class=dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Graphs <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><form class="one-line" method="POST" action="graphs"><input type="text" name="name" value="" /> <button>New</button></form></li>
+                    <% header.graphs.forEach(function(item) { %>
+                        <li><a href="/graphs/<%= item.ident %>"><%= item.label %></a></li>
                     <% }) %>
                 </ul>
             </li>

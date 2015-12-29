@@ -20,7 +20,7 @@
         <% screen.rows.forEach(function(row) { %>
             <div class="row screen">
                 <% row.cols.forEach(function(col) { %>
-                    <div id="widget-<%= local.id %>" class="col-md-<%= col.slots %>">
+                    <div id="widget-<%= local.id %>" class="col-md-<%= col.slots %> widget <%= col.widget %>">
                         <% id = "widget-" + local.id %>
                         <%- include('../widgets/' + col.widget) %>
                         <%
@@ -51,8 +51,8 @@
             <% }) %>
             { name : last_action , target_id : null, params : null }
         ];
-        console.log("inits ");
-        console.dir(inits);
+        //console.log("inits ");
+        //console.dir(inits);
         var funcs = [
             <% local.funcs.forEach(function(f) { %>
                 { name : <%= f.name %>_action, target_id : "<%= f.target_id %>", data : JSON.parse(<%- f.data %>)},
@@ -61,19 +61,21 @@
         ];
 
         function last_action() {
-            console.log("last_action ");
+            //console.log("last_action ");
         }
         function gauge_init(id, data) {
-            console.log("gauge_init for " + id);
+            //console.log("gauge_init for " + id);
+            //console.log("    data " + data);
+            //console.dir(data);
             if (!screen.hasOwnProperty('gauges')) {
                 screen['gauges'] = {};
             }
-            var min = 0;
-            var max = 100;
+            var min = data.min;
+            var max = data.max;
             var config = 
 				{
 					size: 120,
-					label: 'Gauge',
+					label: data.label,
 					min: undefined != min ? min : 0,
 					max: undefined != max ? max : 100,
 					minorTicks: 5
@@ -83,8 +85,8 @@
         }
 
         function gauge_action(id, data) {
-            console.log("gauge_action for " + id);
-            console.log("variable  " + data.variable);
+            //console.log("gauge_action for " + id);
+            //console.log("variable  " + data.variable);
             $.ajax({
                url: '/api/get_last_value',
                type: 'GET',
@@ -107,8 +109,8 @@
 
         }
         function simple_action(id, data) {
-            console.log("simple_action for " + id);
-            console.log("variable  " + data.variable);
+            //console.log("simple_action for " + id);
+            //console.log("variable  " + data.variable);
             $.ajax({
                url: '/api/get_last_value',
                type: 'GET',
@@ -117,7 +119,21 @@
                if ($.isPlainObject(result)) {
                     if (result.status === "OK") {
                         $('#'+id + " .name").html(result.meta.name);
-                        $('#'+id + " .value").html(result.meta.last_value);
+                        var val;
+                        var html;
+                        if (data.type === 'real') {
+                            val = 1.0 * result.meta.last_value
+                            html = val.toFixed(data.precision);
+                        }
+                        else if (data.type === 'int') {
+                            val = 1 * result.meta.last_value
+                            html = val.toFixed(0);
+                        }
+                        else {
+                            html = result.meta.last_value
+                        }
+                        //console.log("val  " + val + "  html = " + html);
+                        $('#'+id + " .value").html(html);
                         $('#'+id + " .unit").html(result.meta.unit);
                     }
                     else {

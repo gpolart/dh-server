@@ -20,6 +20,7 @@ var logger  = require('./lib/logger.js');
 var storage  = require('./lib/storage.js');
 var variables  = require('./lib/variables.js');
 var screens  = require('./lib/screens.js');
+var graphs  = require('./lib/graphs.js');
 var async  = require('async');
 
 //
@@ -108,6 +109,16 @@ var funcs = [
             if (err !== null) {
                 debug("cb initialize screens err  : ", err);
                 res = "screens KO";
+            }
+            cb(err, res);
+        });
+    },
+    function(cb) {
+        graphs.initialize({}, function(err) {
+            var res = "graphs OK";
+            if (err !== null) {
+                debug("cb initialize graphs err  : ", err);
+                res = "graphs KO";
             }
             cb(err, res);
         });

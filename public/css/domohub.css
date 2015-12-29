@@ -3,6 +3,10 @@
     background-color:#404040;
 }
 
+.one-line {
+    white-space: nowrap;
+}
+
 /* Widgets */
 
 .widget {

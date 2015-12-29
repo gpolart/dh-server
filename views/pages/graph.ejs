@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ../partials/head %>
+    <link rel="stylesheet" href="/css/nv.d3.css">
+</head>
+<body class="container-fluid">
+
+    <header>
+        <% include ../partials/header %>
+    </header>
+
+
+    <main class="graph">
+        <h2><%= graph.name %></h2>
+    </main>
+    <footer>
+        <% include ../partials/footer %>
+    </footer>
+    
+    <% include ../partials/javascript %>
+    <script src="/jslib/d3.min.js"></script>
+    <script src="/jslib/nv.d3.min.js"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function() {
+       
+        var wh = $(window).height();
+        var dh = $(document).height();
+        var ww = $(window).width();
+        var dw = $(document).width();
+        console.log("wh = " + wh + " ww = " + ww + " dh = " + dh + " dw = " + dw);
+        var gh = $('main.graph').height();
+        var gw = $('main.graph').width();
+        var pos = $('main.graph').position();
+        console.log("gh = " + gh + " gw = " + gw + " top = " + pos.top + " left = " + pos.left);
+        $('main.graph').height(dh - pos.top);
+        var svg_h = dh - pos.top - 50;
+        $('main.graph').empty();
+        $('<svg id="chart"></svg>').height(svg_h).appendTo($('main.graph'));
+        //var data = [];
+        var data = [{ "key": "Key1", "values": [{x:0, y:1.00},{x:10,y:0.50}]}];
+
+        var start_date = new Date();
+        start_date.setHours(0);
+        start_date.setMinutes(0);
+        start_date.setSeconds(0);
+        var end_date = new Date();
+        end_date.setHours(23);
+        end_date.setMinutes(59);
+        end_date.setSeconds(59);
+
+        // TODO get list from graph def
+        var var_list = ['xpl.messages'];
+
+
+        function draw_graph(data) {
+            nv.addGraph(function() {
+                var chart = nv.models.lineChart()
+                    .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
+                    .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
+                    //.transitionDuration(350)  //how fast do you want the lines to transition?
+                    //.showLegend(true)       //Show the legend, allowing users to turn on/off line series.
+                    .showYAxis(true)        //Show the y-axis
+                    .showXAxis(true)        //Show the x-axis
+                ;
+
+                var tickMultiFormat = d3.time.format.multi([
+                    ["%-H:%M", function(d) { return d.getMinutes(); }], // not the beginning of the hour
+                    ["%-H", function(d) { return d.getHours(); }], // not midnight
+                    ["%b %-d", function(d) { return d.getDate() != 1; }], // not the first of the month
+                    ["%b %-d", function(d) { return d.getMonth(); }], // not Jan 1st
+                    ["%Y", function() { return true; }]
+                ]);
+                chart.xAxis     //Chart x-axis settings
+                    .axisLabel('Time')
+                    .tickFormat(function (d) { return tickMultiFormat(new Date(d)); });
+
+                chart.yAxis     //Chart y-axis settings
+                    .axisLabel('')
+                    .showMaxMin(true)
+                    .tickFormat(d3.format('.02f'));
+
+
+                d3.select('main.graph svg')    //Select the <svg> element you want to render the chart in.   
+                    .datum(data)         //Populate the <svg> element with chart data...
+                    .call(chart);          //Finally, render the chart!
+
+                //Update the chart when window resizes.
+                nv.utils.windowResize(function() { chart.update() });
+                return chart;
+            });
+        }
+
+        function load_values() {
+            $.ajax({
+               url: '/api/get_values',
+               type: 'POST',
+               data: {var_list : var_list, start_date : start_date.formatISO(true, false), end_date:end_date.formatISO(true, false)}
+            }).done(function( result ) {
+               if ($.isPlainObject(result)) {
+                    if (result.status === "OK") {
+                        draw_graph(result.values);
+                    }
+                    else {
+                        alert('Erreur système');
+                    }
+                }
+                else {
+                    alert('Erreur système');
+                }
+            }).fail(function(err) {
+                alert('Erreur  err = ' + err);
+            });
+         }
+
+         load_values();
+
+    });
+    </script> 
+</body>
+</html>
