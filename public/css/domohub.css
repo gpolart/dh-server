@@ -10,11 +10,8 @@
 /* Widgets */
 
 .widget {
-    margin : 0.5em;
-    padding : 1em;
     background-color:#101010;
     color: white;
-    border-style:groove;
 }
 
 /* Simple */
