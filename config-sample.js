@@ -18,7 +18,7 @@ config.storage = {
                  };
 
 config.variables = {
-                    flush_interval : 30         // given in seconds
+                    flush_interval : 60         // given in seconds
                  };
 
 
@@ -37,6 +37,19 @@ config.xpl = {
                         }
                 ]
              };
+
+config.ipx800 = {
+                ip_address     : "192.168.1.23",
+                var_prefix     : "ipx800.",
+                poll_interval  : 300,      // given in seconds
+                inputs         : [],
+                outputs        : [ { key : "IN1", label : "label1" }
+                                 ],
+                analogs        : [],
+                counters       : [ { key : "C1", label : "count1" }
+                                 ]
+             };
+
 
 config.modules = [
                     { name: 'heating', params: {} },
