@@ -47,6 +47,30 @@ Date.prototype.formatISO = function(fl_hour, fl_utc) {
 
 	return c;
 }
+Date.prototype.parseDate = function(val, date_only) {
+	var re;
+	if (date_only) {
+		re = /^(\d+)-(\d+)-(\d+)/;
+	} else {
+		re = /^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)/;
+	}
+	var res = re.exec(val);
+	this.setFullYear(res[1]);
+	this.setDate(1);	// This line is mandatory. If this.getDay is not valid in MiogaDate month, then this.getMonth gets increased
+	this.setMonth(res[2] - 1);
+	this.setDate(res[3]);
+	if (date_only) {
+		this.setHours(0);
+		this.setMinutes(0);
+		this.setSeconds(0);
+		this.setMilliseconds(0);
+	} else {
+		this.setHours(res[4]);
+		this.setMinutes(res[5]);
+		this.setSeconds(res[6]);
+		this.setMilliseconds(0);
+	}
+}
 
 //=========================================================================================
 // Utilities to stop process correctly

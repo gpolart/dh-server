@@ -137,27 +137,16 @@
             });
          }
 
-         function draw_values_as_chart(values) {
+         function draw_values_as_chart(data) {
             $('#values').empty();
-            //$('<svg id="chart"></svg>').height("400px").width('600px').appendTo($('#values'));
             $('<svg id="chart"></svg>').height('600px').appendTo($('#values'));
-            //var data = [{ "key": "Key1", "values": [{x:0, y:1.00},{x:10,y:0.50}]}];
-            var data = [{ "key": "Key1", "values": []}];
-            var lines = values.split("\n");
             var min = 0;
             var max = 0;
-            $.each(lines, function(num, l) {
-                if (l.length > 0) {
-                    var items = l.split(":");
-                    var date = new Date(1*items[0]);
-                    //console.log ("item[0]  "+items[0]+"  date " + date);
-                    var sd = date.formatISO(true, false);
-                    var v = 1.0*items[1];
-                    data[0].values.push({x:items[0], y:v});
-                    if (min > v) { min = v; }
-                    if (max < v) { max = v; }
-                }
-            });
+            console.dir(data);
+            //$.each(data.values, function(num, v) {
+             //       if (min > v.y) { min = v.y; }
+              //      if (max < v.y) { max = v.y; }
+            //});
             nv.addGraph(function() {
                 var chart = nv.models.lineChart()
                                 .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
@@ -186,7 +175,7 @@
 
 
                   d3.select('#chart')    //Select the <svg> element you want to render the chart in.   
-                      .datum(data)         //Populate the <svg> element with chart data...
+                      .datum([data])         //Populate the <svg> element with chart data...
                       .call(chart);          //Finally, render the chart!
 
                   //Update the chart when window resizes.

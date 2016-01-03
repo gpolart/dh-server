@@ -51,7 +51,7 @@
         end_date.setSeconds(59);
 
         // TODO get list from graph def
-        var var_list = ['xpl.messages'];
+        var var_list = ['xpl.rfxcom-lan.0004a3154160.th1_0x7001.temp', 'xpl.rfxcom-lan.0004a3154160.th1_0x9b02.temp', 'xpl.rfxcom-lan.0004a3154160.th1_0xe904.temp'];
 
 
         function draw_graph(data) {
@@ -94,12 +94,18 @@
 
         function load_values() {
             $.ajax({
-               url: '/api/get_values',
+               url: '/api/query',
                type: 'POST',
-               data: {var_list : var_list, start_date : start_date.formatISO(true, false), end_date:end_date.formatISO(true, false)}
+               data: JSON.stringify({var_list : var_list, type: 'Numeric', start_date : start_date.formatISO(true, false), end_date:end_date.formatISO(true, false)}),
+               dataType: "json",
+               contentType: "application/json; charset=utf-8"
             }).done(function( result ) {
                if ($.isPlainObject(result)) {
                     if (result.status === "OK") {
+                        $.each(result.values, function(num, item) {
+                            console.log("key = " + item.key);
+                            console.log("count = " + item.values.length);
+                        });
                         draw_graph(result.values);
                     }
                     else {
