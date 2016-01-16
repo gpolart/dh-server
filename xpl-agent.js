@@ -294,7 +294,9 @@ function store_config () {
 function log_message(msg) {
     debug("log_message ... ");
 
-    record_variable("xpl.logs", msg);
+    var str = msg.replace(/\n/g, " ");
+
+    record_variable("xpl.logs", str);
 }
 
 //=========================================================================================

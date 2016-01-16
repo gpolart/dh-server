@@ -56,46 +56,6 @@ function record_variable(ident, value) {
         // TODO test return of request
     });
 }
-// ---------------------------------------------------------------------------
-// Get values from IPX 800 API
-// ---------------------------------------------------------------------------
-function get_values(cmd, channels, cb) {
-	debug("get_values");
-
-    if (read_active) {
-        log_message("get_values still running");
-    }
-
-    read_active = true;
-
-    var headers = {
-        'User-Agent' :    'enocean-agent',
-        'Content-Type' : 'application/json'
-    };
-
-    var options = {
-        url : 'http://'+config.enocean.ip_address+'/api/xdevices.json?cmd='+cmd,
-        method : 'GET',
-        headers : headers
-    }
-    debug("options ", options);
-
-
-
-    request(options, function(err, resp, body) {
-        if (err) {
-            cb(err, null);
-        }
-        else {
-            var data = JSON.parse(body);
-            var list = [];
-            channels.forEach(function(item, num) {
-                list.push({ label : item.key+"."+item.label, value : data[item.key] });
-            });
-            cb(null, list);
-        }
-    });
-}
 // ----------------------------------------------------------------------------------------
 // Log messages as a variable
 // ----------------------------------------------------------------------------------------
@@ -116,6 +76,7 @@ function start(options) {
 
     enocean.on("data", function(data) {
         debug("data = ", data);
+        record_variable("enocean."+data.senderId+"."+data.packetTypeString, data.raw)
     });
 
 }
