@@ -50,9 +50,17 @@ config.ipx800 = {
                                  ]
              };
 
+config.enocean = {
+                device     : "/dev/ttyUSB0"
+                };
+
 
 config.modules = [
                     { name: 'heating', params: {} },
+                    { name: 'hue', params: {
+                                              ip: "xx.xx.xx.xx",
+                                              username: "xxxxxx",
+                                           } },
                     { name: 'dummy', params: {} }
                  ];
 
